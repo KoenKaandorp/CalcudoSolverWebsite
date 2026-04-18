@@ -497,6 +497,13 @@ html, body {
   outline: 1px solid var(--border-light);
 }
 
+/* Focused cell in play mode */
+.cell.cell-focused {
+  background: #1e2640 !important;
+  box-shadow: inset 0 0 0 2px var(--amber);
+  z-index: 2;
+}
+
 /* Cell value */
 .cell-value {
   font-family: var(--font-display);

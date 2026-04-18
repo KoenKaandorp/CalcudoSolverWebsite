@@ -92,6 +92,7 @@ function switchMode(mode) {
     userGrid = Array.from({ length: gridSize }, () => new Array(gridSize).fill(0));
     hintedCells = new Set();
     solvedGrid = null;
+    focusedCell = null;
 
     panelBuild.classList.add('hidden');
     panelPlay.classList.remove('hidden');
@@ -333,9 +334,9 @@ function cellFromPoint(x, y) {
 
 function onPointerDown(e) {
   if (appMode === 'play') {
-    // In play mode: clicking cycles the value
+    // In play mode: clicking focuses a cell for keyboard input
     const cell = e.target.closest('.cell');
-    if (cell) handlePlayCellClick(parseInt(cell.dataset.r), parseInt(cell.dataset.c));
+    if (cell) setFocusedCell(parseInt(cell.dataset.r), parseInt(cell.dataset.c));
     return;
   }
 
@@ -384,22 +385,63 @@ function cellInAnyCage(r, c) {
   return cages.some(cage => cage.cells.some(([cr, cc]) => cr === r && cc === c));
 }
 
-// ── Play mode cell click: cycle value 0→1→2→...→N→0 ─────────────────────
-function handlePlayCellClick(r, c) {
+// ── Play mode: focused cell ───────────────────────────────────────────────
+let focusedCell = null; // [r, c] or null
+
+function setFocusedCell(r, c) {
   if (!hintGrid) return;
-  if (hintedCells.has(`${r},${c}`)) return; // don't allow editing hinted cells
-
-  const current = userGrid[r][c];
-  userGrid[r][c] = (current % gridSize) + 1;
-  // If we've cycled back past N, set to 0 (empty)
-  if (userGrid[r][c] === current + 1 && current === gridSize) userGrid[r][c] = 0;
-  // Simple cycle: 0→1→2→...→gridSize→0
-  userGrid[r][c] = current >= gridSize ? 0 : current + 1;
-
+  focusedCell = [r, c];
   renderGrid();
-  updatePlayProgress();
-  checkPlayComplete();
 }
+
+function clearFocusedCell() {
+  focusedCell = null;
+  renderGrid();
+}
+
+// Click outside grid clears focus
+document.addEventListener('pointerdown', e => {
+  if (appMode !== 'play') return;
+  if (!gridEl.contains(e.target)) clearFocusedCell();
+});
+
+// Keyboard handler for play mode
+document.addEventListener('keydown', e => {
+  if (appMode !== 'play' || !focusedCell) return;
+
+  const [r, c] = focusedCell;
+
+  // Arrow key navigation
+  if (e.key === 'ArrowRight') { e.preventDefault(); setFocusedCell(r, Math.min(c + 1, gridSize - 1)); return; }
+  if (e.key === 'ArrowLeft')  { e.preventDefault(); setFocusedCell(r, Math.max(c - 1, 0)); return; }
+  if (e.key === 'ArrowDown')  { e.preventDefault(); setFocusedCell(Math.min(r + 1, gridSize - 1), c); return; }
+  if (e.key === 'ArrowUp')    { e.preventDefault(); setFocusedCell(Math.max(r - 1, 0), c); return; }
+
+  // Don't allow editing hinted cells
+  if (hintedCells.has(`${r},${c}`)) return;
+
+  // Delete / Backspace clears cell
+  if (e.key === 'Backspace' || e.key === 'Delete') {
+    e.preventDefault();
+    userGrid[r][c] = 0;
+    renderGrid();
+    updatePlayProgress();
+    return;
+  }
+
+  // Number keys 1..N
+  const num = parseInt(e.key);
+  if (!isNaN(num) && num >= 1 && num <= gridSize) {
+    e.preventDefault();
+    userGrid[r][c] = num;
+    renderGrid();
+    updatePlayProgress();
+    checkPlayComplete();
+    // Auto-advance: move right, wrap to next row
+    if (c < gridSize - 1) setFocusedCell(r, c + 1);
+    else if (r < gridSize - 1) setFocusedCell(r + 1, 0);
+  }
+});
 
 function checkPlayComplete() {
   if (!hintGrid) return;
@@ -504,6 +546,10 @@ function renderGrid() {
           }
         } else {
           cell.classList.add('play-empty');
+        }
+        // Focused cell highlight
+        if (focusedCell && focusedCell[0] === r && focusedCell[1] === c) {
+          cell.classList.add('cell-focused');
         }
       }
     }
