@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calcudo Solver</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="app">
+
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="logo">
+          <span class="logo-box">C</span>
+          <div class="logo-text">
+            <span class="logo-title">Calcudo</span>
+            <span class="logo-sub">Solver</span>
+          </div>
+        </div>
+        <p class="tagline">Fill the grid. Satisfy every cage.</p>
+      </div>
+    </header>
+
+    <main class="main-content">
+
+      <!-- LEFT PANEL: Controls -->
+      <aside class="panel panel-controls">
+        <section class="control-section">
+          <h2 class="section-title">Grid Size</h2>
+          <div class="size-buttons">
+            <button class="size-btn active" data-size="3">3×3</button>
+            <button class="size-btn" data-size="4">4×4</button>
+            <button class="size-btn" data-size="5">5×5</button>
+            <button class="size-btn" data-size="6">6×6</button>
+          </div>
+        </section>
+
+        <section class="control-section">
+          <h2 class="section-title">Cage Builder</h2>
+          <div class="cage-builder">
+            <p class="hint">Click cells on the grid to select them, then define the cage below.</p>
+            <div class="builder-row">
+              <label class="field-label">Operation</label>
+              <div class="op-buttons">
+                <button class="op-btn active" data-op="+">+</button>
+                <button class="op-btn" data-op="−">−</button>
+                <button class="op-btn" data-op="×">×</button>
+                <button class="op-btn" data-op="÷">÷</button>
+                <button class="op-btn" data-op="=">=</button>
+              </div>
+            </div>
+            <div class="builder-row">
+              <label class="field-label" for="cage-target">Target</label>
+              <input id="cage-target" class="target-input" type="number" min="1" placeholder="e.g. 6" />
+            </div>
+            <div class="builder-actions">
+              <button id="btn-add-cage" class="btn btn-primary">Add Cage</button>
+              <button id="btn-clear-selection" class="btn btn-ghost">Clear</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="control-section">
+          <h2 class="section-title">Cages <span id="cage-count" class="badge">0</span></h2>
+          <ul id="cage-list" class="cage-list">
+            <li class="cage-list-empty">No cages added yet.</li>
+          </ul>
+        </section>
+
+        <section class="control-section solve-section">
+          <button id="btn-solve" class="btn btn-solve">Solve Puzzle</button>
+          <button id="btn-reset" class="btn btn-ghost btn-full">Reset All</button>
+          <div id="solve-message" class="solve-message"></div>
+        </section>
+      </aside>
+
+      <!-- CENTER: Grid -->
+      <section class="panel panel-grid">
+        <div class="grid-wrapper">
+          <div id="calcudo-grid" class="calcudo-grid"></div>
+        </div>
+        <p class="grid-hint">Select cells → define cage → Add Cage. All cells must belong to a cage.</p>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="solver.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
